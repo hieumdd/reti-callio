@@ -47,6 +47,7 @@ def call_service(table: str, direction: int):
     )
 
 
-call_inbound_service = call_service("CallInbound", 1)
-call_outbound_service = call_service("CallOutbound", 2)
-call_internal_service = call_service("CallInternal", 3)
+call_inbound_service = call_service("Call_Inbound", 1)
+call_outbound_service = call_service("Call_Outbound", 2)
+call_internal_service = call_service("Call_Internal", 3)
+
