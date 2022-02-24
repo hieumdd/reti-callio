@@ -3,7 +3,7 @@ from datetime import datetime
 
 from requests import Session
 
-from callio import callio_repo, call
+from callio import callio_repo, call, contact
 from db.bigquery import get_last_timestamp, load, update
 from utils import utils
 
@@ -51,3 +51,9 @@ call_inbound_service = call_service("Call_Inbound", 1)
 call_outbound_service = call_service("Call_Outbound", 2)
 call_internal_service = call_service("Call_Internal", 3)
 
+contact_service = pipeline_service(
+    "Contact",
+    callio_repo.get_listing("contact"),
+    contact.transform,
+    load(contact.schema),  # type: ignore
+)

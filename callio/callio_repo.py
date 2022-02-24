@@ -18,7 +18,7 @@ def get_session() -> requests.Session:
     return session
 
 
-def get_listing(uri: str, params: dict[str, Any]):
+def get_listing(uri: str, params: dict[str, Any] = {}):
     def _get(session: requests.Session):
         def __get(timeframe: tuple[datetime, datetime]):
             start, end = timeframe
