@@ -7,6 +7,7 @@ import requests
 
 PAGE_SIZE = 10000
 
+
 def get_url(uri: str) -> str:
     return f"https://clientapi.phonenet.io/{uri}"
 
@@ -18,23 +19,28 @@ def get_session() -> requests.Session:
 
 
 def get_listing(uri: str, params: dict[str, Any]):
-    def _get(session: requests.Session, start: datetime, end: datetime):
-        def __get(page: int = 1) -> list[dict[str, Any]]:
-            with session.get(
-                get_url(uri),
-                params={
-                    **params,
-                    "pageSize": PAGE_SIZE,
-                    "from": int(start.timestamp() * 1000),
-                    "to": int(end.timestamp() * 1000),
-                    "page": page,
-                },
-            ) as r:
-                r.raise_for_status()
-                res = r.json()
-            data = res["docs"]
-            return data + __get(page + 1) if res["hasNextPage"] else data
+    def _get(session: requests.Session):
+        def __get(timeframe: tuple[datetime, datetime]):
+            start, end = timeframe
 
-        return __get()
+            def ___get(page: int = 1) -> list[dict[str, Any]]:
+                with session.get(
+                    get_url(uri),
+                    params={
+                        **params,
+                        "pageSize": PAGE_SIZE,
+                        "from": int(start.timestamp() * 1000),
+                        "to": int(end.timestamp() * 1000),
+                        "page": page,
+                    },
+                ) as r:
+                    r.raise_for_status()
+                    res = r.json()
+                data = res["docs"]
+                return data + ___get(page + 1) if res["hasNextPage"] else data
+
+            return ___get()
+
+        return __get
 
     return _get
