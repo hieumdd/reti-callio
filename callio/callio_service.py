@@ -57,3 +57,10 @@ contact_service = pipeline_service(
     contact.transform,
     load(contact.schema),  # type: ignore
 )
+
+services = {
+    "Call_Inbound": call_inbound_service,
+    "Call_Outbound": call_outbound_service,
+    "Call_Internal": call_internal_service,
+    "Contact": contact_service,
+}
