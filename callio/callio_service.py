@@ -10,29 +10,25 @@ from utils import utils
 
 def pipeline_service(
     table: str,
-    get: Callable[
-        [Session],
-        Callable[[tuple[datetime, datetime]], list[dict[str, Any]]],
-    ],
+    get: Callable[[tuple[datetime, datetime]], list[dict[str, Any]]],
     transform: Callable[[list[dict[str, Any]]], list[dict[str, Any]]],
     load: Callable[[str, Callable[[list[str], str], None]], int],
     id_key: list[str] = ["_id"],
     time_key: str = "createTime",
 ):
     def _svc(start: str, end: str):
-        with callio_repo.get_session() as session:
-            data = utils.compose(
-                lambda x: {
-                    "table": table,
-                    "start": start,
-                    "end": end,
-                    "output_rows": x,
-                },
-                load(table, update(id_key, time_key)),
-                transform,
-                get(session),
-                get_last_timestamp(table, time_key),
-            )((start, end))
+        data = utils.compose(
+            lambda x: {
+                "table": table,
+                "start": start,
+                "end": end,
+                "output_rows": x,
+            },
+            load(table, update(id_key, time_key)),
+            transform,
+            get,
+            get_last_timestamp(table, time_key),
+        )((start, end))
         return data
 
     return _svc
@@ -41,7 +37,11 @@ def pipeline_service(
 def call_service(table: str, direction: int):
     return pipeline_service(
         table,
-        callio_repo.get_listing("call", {"direction": direction}),
+        callio_repo.get_listing(
+            "call",
+            callio_repo.build_params(),
+            {"direction": direction},
+        ),
         call.transform,
         load(call.schema),  # type: ignore
     )
@@ -53,7 +53,10 @@ call_internal_service = call_service("Call_Internal", 3)
 
 contact_service = pipeline_service(
     "Contact",
-    callio_repo.get_listing("contact"),
+    callio_repo.get_listing(
+        "contact",
+        callio_repo.build_params(),
+    ),
     contact.transform,
     load(contact.schema),  # type: ignore
 )
