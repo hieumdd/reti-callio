@@ -20,9 +20,9 @@ def transform(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "updateTime": parse_unix_ts(row["customer"].get("updateTime")),
                 "customFields": [
                     {
-                        "key": custom_fields.get('key'),
-                        "val": custom_fields.get('val'),
-                        "_id": custom_fields.get('_id'),
+                        "key": custom_fields.get("key"),
+                        "val": custom_fields.get("val"),
+                        "_id": custom_fields.get("_id"),
                     }
                     for custom_fields in row["customer"]["customFields"]
                 ]

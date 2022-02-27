@@ -103,7 +103,9 @@ def transform(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "updateTime": parse_unix_ts(row["campaign"].get("updateTime")),
                 "client": row["campaign"].get("client"),
                 "name": row["campaign"].get("name"),
-            } if row.get('campaign') else {},
+            }
+            if row.get("campaign")
+            else {},
             "recordingDownloaded": row.get("recordingDownloaded"),
             "recordingSize": row.get("recordingSize"),
             "chargeDuration": row.get("chargeDuration"),
