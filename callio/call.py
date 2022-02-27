@@ -58,7 +58,52 @@ def transform(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "recording": row.get("recording"),
             "audioQuality": row.get("audioQuality"),
             "__v": row.get("__v"),
-            "campaign": row.get("campaign"),
+            "campaign": {
+                "_id": row["campaign"].get("_id"),
+                "startTime": row["campaign"].get("startTime"),
+                "endTime": row["campaign"].get("endTime"),
+                "retryDelay": row["campaign"].get("retryDelay"),
+                "users": [i for i in row["campaign"]["users"]]
+                if row["campaign"].get("users")
+                else [],
+                "managers": [i for i in row["campaign"]["managers"]]
+                if row["campaign"].get("managers")
+                else [],
+                "active": row["campaign"].get("active"),
+                "overtimeCall": row["campaign"].get("overtimeCall"),
+                "autoCreateOpp": row["campaign"].get("autoCreateOpp"),
+                "autoCreateCustomer": row["campaign"].get("autoCreateCustomer"),
+                "oppAssignType": row["campaign"].get("oppAssignType"),
+                "assignedUsers": [i for i in row["campaign"]["assignedUsers"]]
+                if row["campaign"].get("assignedUsers")
+                else [],
+                "oppAssignStrategy": row["campaign"].get("oppAssignStrategy"),
+                "contactCustomFields": [
+                    {
+                        "inputType": custom_field.get("inputType"),
+                        "inputOptions": [i for i in custom_field["inputOptions"]]
+                        if custom_field.get("inputOptions")
+                        else [],
+                        "requiredOnStatus": [
+                            i for i in custom_field["requiredOnStatus"]
+                        ]
+                        if custom_field.get("requiredOnStatus")
+                        else [],
+                        "_id": custom_field.get("_id"),
+                        "label": custom_field.get("label"),
+                        "key": custom_field.get("key"),
+                        "isOutputData": custom_field.get("isOutputData"),
+                        "refKey": custom_field.get("refKey"),
+                    }
+                    for custom_field in row["campaign"]["contactCustomFields"]
+                ]
+                if row["campaign"].get("contactCustomFields")
+                else [],
+                "createTime": parse_unix_ts(row["campaign"].get("createTime")),
+                "updateTime": parse_unix_ts(row["campaign"].get("updateTime")),
+                "client": row["campaign"].get("client"),
+                "name": row["campaign"].get("name"),
+            } if row.get('campaign') else {},
             "recordingDownloaded": row.get("recordingDownloaded"),
             "recordingSize": row.get("recordingSize"),
             "chargeDuration": row.get("chargeDuration"),
@@ -123,7 +168,49 @@ schema = [
     {"name": "recording", "type": "BOOLEAN"},
     {"name": "audioQuality", "type": "NUMERIC"},
     {"name": "__v", "type": "NUMERIC"},
-    {"name": "campaign", "type": "STRING"},
+    {
+        "name": "campaign",
+        "type": "RECORD",
+        "fields": [
+            {"name": "_id", "type": "STRING"},
+            {"name": "startTime", "type": "INTEGER"},
+            {"name": "endTime", "type": "INTEGER"},
+            {"name": "retryDelay", "type": "INTEGER"},
+            {"name": "users", "type": "STRING", "mode": "REPEATED"},
+            {"name": "managers", "type": "STRING", "mode": "REPEATED"},
+            {"name": "active", "type": "BOOLEAN"},
+            {"name": "overtimeCall", "type": "BOOLEAN"},
+            {"name": "autoCreateOpp", "type": "BOOLEAN"},
+            {"name": "autoCreateCustomer", "type": "BOOLEAN"},
+            {"name": "oppAssignType", "type": "STRING"},
+            {"name": "assignedUsers", "type": "STRING", "mode": "REPEATED"},
+            {"name": "oppAssignStrategy", "type": "STRING"},
+            {
+                "name": "contactCustomFields",
+                "type": "RECORD",
+                "mode": "REPEATED",
+                "fields": [
+                    {"name": "inputType", "type": "STRING"},
+                    {"name": "inputOptions", "type": "STRING", "mode": "REPEATED"},
+                    {"name": "requiredOnStatus", "type": "STRING", "mode": "REPEATED"},
+                    {"name": "_id", "type": "STRING"},
+                    {"name": "label", "type": "STRING"},
+                    {"name": "key", "type": "STRING"},
+                    {"name": "isOutputData", "type": "BOOLEAN"},
+                    {"name": "refKey", "type": "STRING"},
+                ],
+            },
+            {"name": "createTime", "type": "TIMESTAMP"},
+            {"name": "updateTime", "type": "TIMESTAMP"},
+            {"name": "client", "type": "STRING"},
+            {"name": "name", "type": "STRING"},
+            {"name": "dialer", "type": "STRING"},
+            {"name": "maxRetry", "type": "INTEGER"},
+            {"name": "__v", "type": "INTEGER"},
+            {"name": "autoReportOk", "type": "BOOLEAN"},
+            {"name": "phoneNumber", "type": "STRING"},
+        ],
+    },
     {"name": "recordingDownloaded", "type": "BOOLEAN"},
     {"name": "recordingSize", "type": "NUMERIC"},
     {"name": "chargeDuration", "type": "NUMERIC"},
