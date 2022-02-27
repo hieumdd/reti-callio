@@ -61,9 +61,9 @@ customer_service = pipeline_service(
 )
 
 services = {
-    "Call_Inbound": call_inbound_service,
+    # "Call_Inbound": call_inbound_service,
     "Call_Outbound": call_outbound_service,
-    "Call_Internal": call_internal_service,
+    # "Call_Internal": call_internal_service,
     "Contact": contact_service,
     "Customer": customer_service,
 }
