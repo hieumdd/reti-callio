@@ -1,0 +1,49 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - master
+      - dev
+  workflow_dispatch:
+
+concurrency: ${{ github.ref }}
+
+env:
+  PROJECT_ID: reti-vn-1
+  GCP_SA: bi-reti@reti-vn-1.iam.gserviceaccount.com
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set env vars (dev)
+        if: endsWith(github.ref, '/dev')
+        run: |
+          echo "FUNCTION_NAME=reti-callio-dev" >> $GITHUB_ENV
+          echo "PUBLIC_URL=https://us-central1-reti-vn-1.cloudfunctions.net/reti-callio-dev" >> $GITHUB_ENV
+
+      - name: Set env vars (prod)
+        if: endsWith(github.ref, '/master')
+        run: |
+          echo "FUNCTION_NAME=reti-callio" >> $GITHUB_ENV
+          echo "PUBLIC_URL=https://us-central1-reti-vn-1.cloudfunctions.net/reti-callio" >> $GITHUB_ENV
+
+      - name: Auth
+        uses: "google-github-actions/auth@v0"
+        with:
+          credentials_json: "${{ secrets.GCP_SA_KEY }}"
+
+      - name: Deploy
+        uses: google-github-actions/deploy-cloud-functions@v0
+        with:
+          name: ${{ env.FUNCTION_NAME }}
+          entry_point: main
+          runtime: python39
+          memory_mb: 2048MB,
+          timeout: 530,
+          service_account_email: ${{ env.GCP_SA }}
+          env_vars: GCP_SA=${{ env.GCP_SA }},PROJECT_ID=${{ env.PROJECT_ID }},PUBLIC_URL=${{ env.PUBLIC_URL }},CALLIO_TOKEN=${{ secrets.CALLIO_TOKEN }}
