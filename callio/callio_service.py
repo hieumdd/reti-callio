@@ -1,9 +1,7 @@
-from typing import Any, Callable
+from typing import Any, Callable, Union
 from datetime import datetime
 
-from requests import Session
-
-from callio import callio_repo, call, contact
+from callio import callio_repo, call, contact, customer
 from db.bigquery import get_last_timestamp, load, update
 from utils import utils
 
@@ -16,8 +14,8 @@ def pipeline_service(
     id_key: list[str] = ["_id"],
     time_key: str = "createTime",
 ):
-    def _svc(start: str, end: str):
-        data = utils.compose(
+    def _svc(start: str, end: str) -> dict[str, Union[str, int]]:
+        return utils.compose(
             lambda x: {
                 "table": table,
                 "start": start,
@@ -29,7 +27,6 @@ def pipeline_service(
             get,
             get_last_timestamp(table, time_key),
         )((start, end))
-        return data
 
     return _svc
 
@@ -61,9 +58,21 @@ contact_service = pipeline_service(
     load(contact.schema),  # type: ignore
 )
 
+customer_service = pipeline_service(
+    "Customer",
+    callio_repo.get_listing(
+        "customer",
+        callio_repo.build_params(True),
+    ),
+    customer.transform,
+    load(customer.schema), # type: ignore
+    time_key="updateTime"
+)
+
 services = {
     "Call_Inbound": call_inbound_service,
     "Call_Outbound": call_outbound_service,
     "Call_Internal": call_internal_service,
     "Contact": contact_service,
+    "Customer": customer_service,
 }
