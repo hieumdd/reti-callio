@@ -50,6 +50,7 @@ contact_service = pipeline_service(
     callio_repo.get_listing("contact"),
     contact.transform,
     load(contact.schema),  # type: ignore
+    listing_type=callio_repo.ListingType.Update,
 )
 
 customer_service = pipeline_service(
