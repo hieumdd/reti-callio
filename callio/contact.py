@@ -40,6 +40,7 @@ def transform(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "phone": row.get("phone"),
             "name": row.get("name"),
             "__v": row.get("__v"),
+            "updateTime": parse_unix_ts(row.get("updateTime")),
         }
         for row in rows
     ]
@@ -82,4 +83,5 @@ schema = [
     {"name": "phone", "type": "STRING"},
     {"name": "name", "type": "STRING"},
     {"name": "__v", "type": "INTEGER"},
+    {"name": "updateTime", "type": "TIMESTAMP"},
 ]
