@@ -1,9 +1,10 @@
 from typing import Any, Callable, Union
 from datetime import datetime
 
+from compose import compose
+
 from callio import callio_repo, call, contact, customer
 from db.bigquery import get_last_timestamp, load, update
-from utils import utils
 
 
 def pipeline_service(
@@ -16,7 +17,7 @@ def pipeline_service(
 ):
     def _svc(start: str, end: str) -> dict[str, Union[str, int]]:
         time_key, params_builder = listing_type.value
-        return utils.compose(
+        return compose(
             lambda x: {
                 "table": table,
                 "start": start,

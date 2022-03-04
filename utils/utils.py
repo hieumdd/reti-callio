@@ -1,5 +1,4 @@
 from typing import Optional
-from functools import reduce
 from datetime import datetime, timezone
 
 
@@ -14,10 +13,3 @@ def parse_unix_ts(x: Optional[int]) -> Optional[str]:
         )
     except:
         return None
-
-
-def compose(*func):
-    def _compose(f, g):
-        return lambda x: f(g(x))
-
-    return reduce(_compose, func, lambda x: x)
