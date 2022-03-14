@@ -5,7 +5,7 @@ from tasks import tasks_service
 
 TIME_FRAME = [
     ("auto", (None, None)),
-    ("manual", ("2022-01-01", "2022-03-01")),
+    ("manual", ("2022-01-01", "2022-01-10")),
 ]
 
 

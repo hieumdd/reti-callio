@@ -2,7 +2,7 @@ from typing import Any, Callable, Union
 
 from compose import compose
 
-from callio import callio, callio_repo, call, contact, customer
+from callio import callio, callio_repo, call, contact, customer, call_campaign_dial
 from db.bigquery import get_last_timestamp, load, update
 
 
@@ -61,10 +61,19 @@ customer_service = pipeline_service(
     load(customer.schema),  # type: ignore
 )
 
+call_campaign_dial_service = pipeline_service(
+    "CallCampaignDial",
+    callio_repo.get_listing("call-campaign-dial"),
+    call_campaign_dial.transform,
+    load(call_campaign_dial.schema),  # type: ignore
+    page_key=callio.create_params,
+)
+
 services = {
     # "Call_Inbound": call_inbound_service,
     "Call_Outbound": call_outbound_service,
     # "Call_Internal": call_internal_service,
     "Contact": contact_service,
     "Customer": customer_service,
+    "CallCampaignDial": call_campaign_dial_service,
 }
