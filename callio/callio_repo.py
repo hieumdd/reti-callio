@@ -1,40 +1,28 @@
 from typing import Any, Callable, Union
 import os
 import asyncio
-
 from datetime import datetime
 
 import httpx
 
+from callio import callio
+
 PAGE_SIZE = 500
 
-ParamsBuilder = Callable[
-    [dict[str, Any], tuple[datetime, datetime]],
-    dict[str, Union[str, int]],
-]
 
-
-def _build_params(from_key: str, to_key: str):
-    def _build(
-        params: dict[str, Any],
-        timeframe: tuple[datetime, datetime],
-    ) -> dict[str, Union[str, int]]:
-        start, end = timeframe
-        return {
-            **params,
-            "pageSize": PAGE_SIZE,
-            from_key: int(start.timestamp() * 1000),
-            to_key: int(end.timestamp() * 1000),
-        }
-
-    return _build
-
-
-create_params: ParamsBuilder = _build_params("from", "to")
-update_params: ParamsBuilder = _build_params("fromUpdateTime", "toUpdateTime")
-
-create_time = "createTime"
-update_time = "updateTime"
+def _build_params(
+    page_key: callio.PageKey,
+    params: dict[str, Any],
+    timeframe: tuple[datetime, datetime],
+) -> dict[str, Union[str, int]]:
+    from_key, to_key = page_key
+    start, end = timeframe
+    return {
+        **params,
+        "pageSize": PAGE_SIZE,
+        from_key: int(start.timestamp() * 1000),
+        to_key: int(end.timestamp() * 1000),
+    }
 
 
 def get_url(uri: str) -> str:
@@ -60,16 +48,11 @@ async def get_listing_page(
 
 
 def get_listing(uri: str, params: dict[str, Any] = {}):
-    def _get(
-        params_builder: Callable[
-            [dict[str, Any], tuple[datetime, datetime]],
-            dict[str, Any],
-        ],
-    ):
+    def _get(page_key: callio.PageKey):
         def __get(timeframe: tuple[datetime, datetime]) -> list[dict[str, Any]]:
             async def ___get():
                 url = get_url(uri)
-                _params = params_builder(params, timeframe)
+                _params = _build_params(page_key, params, timeframe)
                 async with get_client(True) as client:
                     pages = await get_listing_page(
                         client,

@@ -2,20 +2,17 @@ from typing import Any, Callable, Union
 
 from compose import compose
 
-from callio import callio_repo, call, contact, customer
+from callio import callio, callio_repo, call, contact, customer
 from db.bigquery import get_last_timestamp, load, update
 
 
 def pipeline_service(
     table: str,
-    get: Callable[
-        [callio_repo.ParamsBuilder],
-        list[dict[str, Any]],
-    ],
+    get: Callable[[callio.PageKey], list[dict[str, Any]]],
     transform: Callable[[list[dict[str, Any]]], list[dict[str, Any]]],
     load: Callable[[str, Callable[[list[str], str], None]], int],
-    params_builder: callio_repo.ParamsBuilder = callio_repo.update_params,
-    time_key: str = callio_repo.update_time,
+    page_key: callio.PageKey = callio.update_params,
+    time_key: str = callio.update_time,
     id_key: list[str] = ["_id"],
 ):
     def _svc(start: str, end: str) -> dict[str, Union[str, int]]:
@@ -28,7 +25,7 @@ def pipeline_service(
             },
             load(table, update(id_key, time_key)),
             transform,
-            get(params_builder),
+            get(page_key),
             get_last_timestamp(table, time_key),
         )((start, end))
 
@@ -41,8 +38,8 @@ def call_service(table: str, direction: int):
         callio_repo.get_listing("call", {"direction": direction}),
         call.transform,
         load(call.schema),  # type: ignore
-        callio_repo.create_params,
-        callio_repo.create_time,
+        callio.create_params,
+        callio.create_time,
     )
 
 
