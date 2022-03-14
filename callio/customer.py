@@ -83,7 +83,7 @@ schema = [
     },
     {"name": "desc", "type": "STRING"},
     {"name": "name", "type": "STRING"},
-    {"name": "__v", "type": "INTEGER"},
+    {"name": "__v", "type": "NUMERIC"},
     {
         "name": "mainContact",
         "type": "record",
@@ -98,7 +98,7 @@ schema = [
             {"name": "customer", "type": "STRING"},
             {"name": "phone", "type": "STRING"},
             {"name": "name", "type": "STRING"},
-            {"name": "__v", "type": "INTEGER"},
+            {"name": "__v", "type": "NUMERIC"},
         ],
     },
     {"name": "id", "type": "STRING"},
