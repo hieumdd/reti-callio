@@ -1,5 +1,4 @@
 from typing import Any, Callable, Union
-from enum import Enum
 import os
 import asyncio
 
@@ -9,14 +8,10 @@ import httpx
 
 PAGE_SIZE = 500
 
-
-def get_url(uri: str) -> str:
-    return f"https://clientapi.phonenet.io/{uri}"
-
-
-def get_client(async_=False) -> Union[httpx.Client, httpx.AsyncClient]:
-    client = httpx.AsyncClient if async_ else httpx.Client
-    return client(headers={"token": os.getenv("CALLIO_TOKEN", "")}, timeout=None)
+ParamsBuilder = Callable[
+    [dict[str, Any], tuple[datetime, datetime]],
+    dict[str, Union[str, int]],
+]
 
 
 def _build_params(from_key: str, to_key: str):
@@ -35,9 +30,20 @@ def _build_params(from_key: str, to_key: str):
     return _build
 
 
-class ListingType(Enum):
-    Create = ("createTime", _build_params("from", "to"))
-    Update = ("updateTime", _build_params("fromUpdateTime", "toUpdateTime"))
+create_params: ParamsBuilder = _build_params("from", "to")
+update_params: ParamsBuilder = _build_params("fromUpdateTime", "toUpdateTime")
+
+create_time = "createTime"
+update_time = "updateTime"
+
+
+def get_url(uri: str) -> str:
+    return f"https://clientapi.phonenet.io/{uri}"
+
+
+def get_client(async_=False) -> Union[httpx.Client, httpx.AsyncClient]:
+    client = httpx.AsyncClient if async_ else httpx.Client
+    return client(headers={"token": os.getenv("CALLIO_TOKEN", "")}, timeout=None)
 
 
 async def get_listing_page(

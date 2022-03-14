@@ -1,5 +1,4 @@
 from typing import Any, Callable, Union
-from datetime import datetime
 
 from compose import compose
 
@@ -9,14 +8,17 @@ from db.bigquery import get_last_timestamp, load, update
 
 def pipeline_service(
     table: str,
-    get: Callable[[tuple[datetime, datetime]], list[dict[str, Any]]],
+    get: Callable[
+        [callio_repo.ParamsBuilder],
+        list[dict[str, Any]],
+    ],
     transform: Callable[[list[dict[str, Any]]], list[dict[str, Any]]],
     load: Callable[[str, Callable[[list[str], str], None]], int],
+    params_builder: callio_repo.ParamsBuilder = callio_repo.update_params,
+    time_key: str = callio_repo.update_time,
     id_key: list[str] = ["_id"],
-    listing_type: callio_repo.ListingType = callio_repo.ListingType.Create,
 ):
     def _svc(start: str, end: str) -> dict[str, Union[str, int]]:
-        time_key, params_builder = listing_type.value
         return compose(
             lambda x: {
                 "table": table,
@@ -39,6 +41,8 @@ def call_service(table: str, direction: int):
         callio_repo.get_listing("call", {"direction": direction}),
         call.transform,
         load(call.schema),  # type: ignore
+        callio_repo.create_params,
+        callio_repo.create_time,
     )
 
 
@@ -51,7 +55,6 @@ contact_service = pipeline_service(
     callio_repo.get_listing("contact"),
     contact.transform,
     load(contact.schema),  # type: ignore
-    listing_type=callio_repo.ListingType.Update,
 )
 
 customer_service = pipeline_service(
@@ -59,7 +62,6 @@ customer_service = pipeline_service(
     callio_repo.get_listing("customer"),
     customer.transform,
     load(customer.schema),  # type: ignore
-    listing_type=callio_repo.ListingType.Update,
 )
 
 services = {
